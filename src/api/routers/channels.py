@@ -1,7 +1,6 @@
 """Channel performance analytics router."""
 
-import sqlite3
-from typing import List
+from typing import List, Any
 from fastapi import APIRouter, Depends
 from ..database import get_db_connection
 from ..services import fetch_channel_performance
@@ -17,7 +16,7 @@ router = APIRouter(prefix="/channels", tags=["Channel Performance"])
     description="Returns origination volume, approval rates, and financial totals for all 4 channels (Online, Branch, Mobile App, Agent)."
 )
 def get_channel_metrics(
-    conn: sqlite3.Connection = Depends(get_db_connection)
+    conn: Any = Depends(get_db_connection)
 ) -> List[ChannelPerformanceItem]:
     """Fetch channel performance analytics."""
     return fetch_channel_performance(conn)

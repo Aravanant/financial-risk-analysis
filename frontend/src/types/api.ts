@@ -8,6 +8,7 @@
 export interface HealthResponse {
   status: 'healthy' | 'degraded' | 'unhealthy';
   connected: boolean;
+  database_backend?: 'postgresql' | 'sqlite' | string | null;
   database_size_bytes?: number | null;
   schema_version: string;
   record_counts?: {

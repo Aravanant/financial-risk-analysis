@@ -1,6 +1,6 @@
 """Data quality metrics and audit flags router."""
 
-import sqlite3
+from typing import Any
 from fastapi import APIRouter, Depends
 from ..database import get_db_connection
 from ..services import fetch_data_quality_metrics
@@ -16,7 +16,7 @@ router = APIRouter(prefix="/data-quality", tags=["Data Quality & Audit"])
     description="Returns audit flag counts for sanitized negative values/ages, missingness breakdowns, genuine zeros, and haircut exclusions."
 )
 def get_data_quality_report(
-    conn: sqlite3.Connection = Depends(get_db_connection)
+    conn: Any = Depends(get_db_connection)
 ) -> DataQualityResponse:
     """Fetch data quality metrics."""
     return fetch_data_quality_metrics(conn)

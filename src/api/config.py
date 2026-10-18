@@ -8,7 +8,7 @@ Environment Variables:
 """
 
 import os
-from typing import List
+from typing import List, Optional
 
 
 class Settings:
@@ -23,6 +23,23 @@ class Settings:
     DEFAULT_DB_PATH: str = os.path.join(BASE_DIR, "data", "processed", "risklens_analytics.db")
     DB_PATH: str = os.getenv("RISKLENS_DB_PATH", DEFAULT_DB_PATH)
     
+    # Production PostgreSQL / Supabase connection string
+    # When unset or empty, backend defaults to local verified SQLite warehouse
+    DATABASE_URL: Optional[str] = os.getenv("DATABASE_URL")
+
+    @property
+    def is_postgres(self) -> bool:
+        """Return True if production PostgreSQL / Supabase DATABASE_URL is configured."""
+        return bool(self.DATABASE_URL and self.DATABASE_URL.strip())
+
+    @property
+    def masked_database_url(self) -> Optional[str]:
+        """Return DATABASE_URL with user password masked for safe logging/diagnostics."""
+        if not self.DATABASE_URL:
+            return None
+        import re
+        return re.sub(r"://([^:]+):([^@]+)@", r"://\1:***@", self.DATABASE_URL)
+
     API_V1_PREFIX: str = os.getenv("RISKLENS_API_PREFIX", "/api/v1")
     
     # Application metadata

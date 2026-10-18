@@ -3,6 +3,7 @@
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115%2B-009688.svg)](https://fastapi.tiangolo.com/)
 [![SQLite 3](https://img.shields.io/badge/SQLite-3-003B57.svg)](https://www.sqlite.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Supabase-336791.svg)](https://supabase.com/)
 [![React 19](https://img.shields.io/badge/React-19-61DAFB.svg)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0%2B-3178C6.svg)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-6.0%2B-646CFF.svg)](https://vitejs.dev/)
@@ -17,15 +18,16 @@
 2. [Verified Portfolio Metrics](#verified-portfolio-metrics)
 3. [Underwriting Haircut & Exclusion Ledger](#underwriting-haircut--exclusion-ledger)
 4. [Technology Stack & System Architecture](#technology-stack--system-architecture)
-5. [Dashboard Tour & Presentation Assets](#dashboard-tour--presentation-assets)
-6. [Repository Structure](#repository-structure)
-7. [Data Governance & Cleaning Methodology](#data-governance--cleaning-methodology)
-8. [Setup & Installation (Linux, macOS, Windows)](#setup--installation-linux-macos-windows)
-9. [Running the Services](#running-the-services)
-10. [Automated Testing & Build Verification](#automated-testing--build-verification)
-11. [API Reference & Query Examples](#api-reference--query-examples)
-12. [Methodology & Architecture References](#methodology--architecture-references)
-13. [Limitations & Responsible Use Disclosures](#limitations--responsible-use-disclosures)
+5. [Supabase PostgreSQL Production Migration](#supabase-postgresql-production-migration)
+6. [Dashboard Tour & Presentation Assets](#dashboard-tour--presentation-assets)
+7. [Repository Structure](#repository-structure)
+8. [Data Governance & Cleaning Methodology](#data-governance--cleaning-methodology)
+9. [Setup & Installation (Linux, macOS, Windows)](#setup--installation-linux-macos-windows)
+10. [Running the Services](#running-the-services)
+11. [Automated Testing & Build Verification](#automated-testing--build-verification)
+12. [API Reference & Query Examples](#api-reference--query-examples)
+13. [Methodology & Architecture References](#methodology--architecture-references)
+14. [Limitations & Responsible Use Disclosures](#limitations--responsible-use-disclosures)
 
 ---
 
@@ -152,8 +154,37 @@ flowchart TD
 | :--- | :--- | :--- | :--- |
 | **ETL & Validation** | Ingestion Engine | Python 3.10+, Pandas 2.2, SHA-256 | Immutable raw file checking, 67-column deduplication, non-destructive audit flags. |
 | **Data Warehouse** | Relational Warehouse | SQLite 3, Foreign Keys, WAL mode | Star-schema dimensional model with 3-Valued Logic SQL views and atomic transaction commits. |
-| **Backend API** | Analytics REST Service | FastAPI 0.115, Uvicorn, Pydantic 2.8 | Fully typed asynchronous endpoints, SQL injection-safe parameterization, whitelisted sort columns. |
+| **Backend API** | Analytics REST Service | FastAPI 0.115, Uvicorn, Pydantic 2.8, Psycopg2 | Fully typed asynchronous endpoints, dual SQLite/PostgreSQL engine, SQL injection-safe parameterization. |
 | **Frontend UI** | Risk Dashboard | React 19, TypeScript 5, Vite 6 | Pure custom CSS design tokens, glassmorphism UI, tabbed routing, drawer detail views, zero unverified assumptions. |
+
+---
+
+## Supabase PostgreSQL Production Migration
+
+RiskLens AI supports a **dual-database architecture**:
+- **Local Development & Automated Tests**: Uses SQLite (`data/processed/risklens_analytics.db`) in read-only mode by default when `DATABASE_URL` is unset.
+- **Production Deployment**: Connects to **Supabase PostgreSQL** via `psycopg2-binary` when `DATABASE_URL` is set, with enforced SSL (`sslmode=require`), serverless-friendly connection management, and sanitized health checks.
+
+### Safe CLI Migration Tool
+
+Schema migrations, data imports, and reconciliation verifications are executed via `scripts/migrate_to_supabase.py`:
+
+```bash
+# 1. Set production Supabase connection string
+export DATABASE_URL="postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres?sslmode=require"
+
+# 2. Create tables, constraints, indexes, and all 7 analytical views
+python3 scripts/migrate_to_supabase.py --schema-only
+
+# 3. Stream 100,000 clean fact records & dimensions from SQLite to Supabase
+python3 scripts/migrate_to_supabase.py --import-data
+
+# 4. Verify side-by-side reconciliation (all 26 metrics checked for 100% parity)
+python3 scripts/migrate_to_supabase.py --verify
+```
+
+> [!TIP]
+> For complete step-by-step instructions, Vercel environment setup, and architecture diagrams, consult the [Supabase Migration Runbook](docs/supabase_migration_guide.md).
 
 ---
 
@@ -205,6 +236,7 @@ Financial Risk Analysis/
 ├── docs/
 │   ├── architecture.md                       # Comprehensive system architecture & data boundary spec
 │   ├── data_dictionary.md                   # Column dictionary, audit flags, and haircut methodology
+│   ├── supabase_migration_guide.md           # Supabase PostgreSQL production migration runbook
 │   └── screenshots/                          # Production dashboard screenshot assets (PNG)
 │       ├── 01_overview.png
 │       ├── 02_loan_purpose.png
@@ -224,11 +256,13 @@ Financial Risk Analysis/
 │   ├── package.json                          # Frontend package configuration (npm)
 │   ├── package-lock.json                     # Pinned frontend dependency lockfile
 │   └── vite.config.ts                        # Vite configuration with /api proxy
+├── scripts/
+│   └── migrate_to_supabase.py                # Supabase PostgreSQL migration & reconciliation CLI
 ├── src/
 │   ├── api/
 │   │   ├── main.py                           # FastAPI application entrypoint & middleware
 │   │   ├── crud.py                           # Parameterized SQLite query engine
-│   │   ├── database.py                       # Read-only SQLite connection manager
+│   │   ├── database.py                       # Dual SQLite/PostgreSQL connection manager
 │   │   ├── config.py                         # Environment and database configuration
 │   │   ├── schemas.py                        # Pydantic serialization models
 │   │   ├── services.py                       # Analytical service orchestration
@@ -240,7 +274,8 @@ Financial Risk Analysis/
 ├── tests/
 │   ├── test_etl_pipeline.py                  # ETL integrity, SHA-256 & constraint tests
 │   ├── test_analytical_sql.py                # SQL view consistency & exclusion cohort tests
-│   └── test_api.py                           # API schema, injection resistance & boundary tests
+│   ├── test_api.py                           # API schema, injection resistance & boundary tests
+│   └── test_database_postgres.py             # PostgreSQL driver, SSL, and schema syntax tests
 ├── .gitignore                                # Excludes caches, venvs, and ephemeral build files
 ├── requirements.txt                          # Python dependencies with minimum version constraints
 └── README.md                                 # Executive project summary and guide (this document)

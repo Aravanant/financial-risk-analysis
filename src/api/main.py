@@ -41,8 +41,10 @@ async def lifespan(app: FastAPI):
     logger.info("Initializing RiskLens AI Analytics API...")
     health_status = check_db_health()
     if health_status.get("status") == "healthy":
+        backend_name = health_status.get("database_backend", "sqlite")
+        target_name = settings.masked_database_url if settings.is_postgres else settings.DB_PATH
         logger.info(
-            f"Database connected and verified: {settings.DB_PATH} "
+            f"Database connected and verified ({backend_name}): {target_name} "
             f"({health_status.get('database_size_bytes', 0):,} bytes)"
         )
     else:

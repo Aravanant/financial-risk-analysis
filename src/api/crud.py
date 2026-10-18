@@ -23,7 +23,7 @@ ALLOWED_SORT_COLUMNS = {
 }
 
 
-def get_portfolio_kpis(conn: sqlite3.Connection) -> Dict[str, Any]:
+def get_portfolio_kpis(conn: Any) -> Dict[str, Any]:
     """Retrieve primary portfolio KPIs from vw_portfolio_kpis view."""
     cur = conn.cursor()
     cur.execute("SELECT * FROM vw_portfolio_kpis;")
@@ -33,21 +33,21 @@ def get_portfolio_kpis(conn: sqlite3.Connection) -> Dict[str, Any]:
     return dict(row)
 
 
-def get_channel_performance(conn: sqlite3.Connection) -> List[Dict[str, Any]]:
+def get_channel_performance(conn: Any) -> List[Dict[str, Any]]:
     """Retrieve channel-level performance metrics from vw_channel_performance."""
     cur = conn.cursor()
     cur.execute("SELECT * FROM vw_channel_performance ORDER BY channel_id;")
     return [dict(r) for r in cur.fetchall()]
 
 
-def get_loan_purposes(conn: sqlite3.Connection) -> List[Dict[str, Any]]:
+def get_loan_purposes(conn: Any) -> List[Dict[str, Any]]:
     """Retrieve loan purpose volume and haircut metrics from vw_loan_purpose_analysis."""
     cur = conn.cursor()
     cur.execute("SELECT * FROM vw_loan_purpose_analysis ORDER BY purpose_id;")
     return [dict(r) for r in cur.fetchall()]
 
 
-def get_haircut_summary(conn: sqlite3.Connection) -> Dict[str, Any]:
+def get_haircut_summary(conn: Any) -> Dict[str, Any]:
     """Retrieve portfolio-level aggregate haircut summary from vw_portfolio_haircut_summary."""
     cur = conn.cursor()
     cur.execute("SELECT * FROM vw_portfolio_haircut_summary;")
@@ -57,14 +57,14 @@ def get_haircut_summary(conn: sqlite3.Connection) -> Dict[str, Any]:
     return dict(row)
 
 
-def get_risk_tiers(conn: sqlite3.Connection) -> List[Dict[str, Any]]:
+def get_risk_tiers(conn: Any) -> List[Dict[str, Any]]:
     """Retrieve source-provided risk tier statistics from vw_risk_tier_summary."""
     cur = conn.cursor()
     cur.execute("SELECT * FROM vw_risk_tier_summary;")
     return [dict(r) for r in cur.fetchall()]
 
 
-def get_data_quality_metrics(conn: sqlite3.Connection) -> Dict[str, Any]:
+def get_data_quality_metrics(conn: Any) -> Dict[str, Any]:
     """Retrieve audit flag counts and missingness metrics from vw_data_quality_metrics."""
     cur = conn.cursor()
     cur.execute("SELECT * FROM vw_data_quality_metrics;")
@@ -75,7 +75,7 @@ def get_data_quality_metrics(conn: sqlite3.Connection) -> Dict[str, Any]:
 
 
 def get_applications_paginated(
-    conn: sqlite3.Connection,
+    conn: Any,
     page: int = 1,
     page_size: int = 50,
     decision: Optional[str] = None,
@@ -203,7 +203,7 @@ def get_applications_paginated(
     return total_count, items
 
 
-def get_application_by_id(conn: sqlite3.Connection, application_id: int) -> Optional[Dict[str, Any]]:
+def get_application_by_id(conn: Any, application_id: int) -> Optional[Dict[str, Any]]:
     """
     Retrieve a single loan application by ID joined with conformed dimensions.
     
@@ -271,7 +271,7 @@ def get_application_by_id(conn: sqlite3.Connection, application_id: int) -> Opti
     return dict(row) if row else None
 
 
-def get_servicing_demo_record(conn: sqlite3.Connection, application_id: int) -> Optional[Dict[str, Any]]:
+def get_servicing_demo_record(conn: Any, application_id: int) -> Optional[Dict[str, Any]]:
     """
     Retrieve quarantined synthetic servicing record for demonstration purposes.
     

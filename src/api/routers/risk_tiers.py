@@ -1,7 +1,6 @@
 """Risk tier summary analytics router."""
 
-import sqlite3
-from typing import List
+from typing import List, Any
 from fastapi import APIRouter, Depends
 from ..database import get_db_connection
 from ..services import fetch_risk_tiers
@@ -20,7 +19,7 @@ router = APIRouter(prefix="/risk-tiers", tags=["Risk Tiers"])
     )
 )
 def get_risk_tier_metrics(
-    conn: sqlite3.Connection = Depends(get_db_connection)
+    conn: Any = Depends(get_db_connection)
 ) -> List[RiskTierItem]:
     """Fetch risk tier analytics."""
     return fetch_risk_tiers(conn)

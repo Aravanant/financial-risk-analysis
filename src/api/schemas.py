@@ -21,8 +21,9 @@ class BaseSchema(BaseModel):
 
 class HealthResponse(BaseSchema):
     status: str = Field(..., description="System health status ('healthy', 'degraded', 'unhealthy')")
-    connected: bool = Field(..., description="SQLite database connectivity indicator")
-    database_size_bytes: Optional[int] = Field(None, description="Physical database file size in bytes")
+    connected: bool = Field(..., description="Database connectivity indicator")
+    database_backend: Optional[str] = Field("sqlite", description="Active database engine ('postgresql' or 'sqlite')")
+    database_size_bytes: Optional[int] = Field(None, description="Physical database file or relation size in bytes")
     schema_version: str = Field(..., description="Underwriting warehouse schema version")
     record_counts: Optional[Dict[str, int]] = Field(None, description="Row counts across key tables")
     error: Optional[str] = Field(None, description="Diagnostic error message if degraded")

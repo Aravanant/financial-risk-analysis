@@ -1,6 +1,6 @@
 """Underwriting haircut metrics router."""
 
-import sqlite3
+from typing import Any
 from fastapi import APIRouter, Depends
 from ..database import get_db_connection
 from ..services import fetch_haircut_analysis
@@ -19,7 +19,7 @@ router = APIRouter(prefix="/haircut", tags=["Underwriting Haircut"])
     )
 )
 def get_haircut_metrics(
-    conn: sqlite3.Connection = Depends(get_db_connection)
+    conn: Any = Depends(get_db_connection)
 ) -> HaircutResponse:
     """Fetch underwriting haircut metrics and eligibility audit."""
     return fetch_haircut_analysis(conn)

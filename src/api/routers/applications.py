@@ -1,7 +1,6 @@
 """Loan applications query and detail router."""
 
-import sqlite3
-from typing import Optional
+from typing import Optional, Any
 from fastapi import APIRouter, Depends, Query, Path, HTTPException, status
 from ..database import get_db_connection
 from ..services import fetch_applications_paginated, fetch_application_by_id
@@ -55,7 +54,7 @@ def list_applications(
         pattern="^(asc|desc|ASC|DESC)$",
         description="Sort order ('asc', 'desc')"
     ),
-    conn: sqlite3.Connection = Depends(get_db_connection)
+    conn: Any = Depends(get_db_connection)
 ) -> PaginatedApplicationsResponse:
     """Fetch paginated application records with validated optional filters."""
     return fetch_applications_paginated(
@@ -83,7 +82,7 @@ def list_applications(
 )
 def get_application(
     application_id: int = Path(..., ge=1, description="Application identifier"),
-    conn: sqlite3.Connection = Depends(get_db_connection)
+    conn: Any = Depends(get_db_connection)
 ) -> ApplicationSummary:
     """Fetch single application by ID or return 404."""
     app = fetch_application_by_id(conn, application_id)

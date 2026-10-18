@@ -7,7 +7,7 @@ Strict Requirements:
 4. Never feeds or mutates primary portfolio or haircut analytics.
 """
 
-import sqlite3
+from typing import Any
 from fastapi import APIRouter, Depends, Path, HTTPException, status
 from ..database import get_db_connection
 from ..services import fetch_servicing_demo_record
@@ -30,7 +30,7 @@ router = APIRouter(prefix="/demo/servicing-snapshot", tags=["Demonstration Servi
 )
 def get_servicing_record(
     application_id: int = Path(..., ge=1, description="Application identifier"),
-    conn: sqlite3.Connection = Depends(get_db_connection)
+    conn: Any = Depends(get_db_connection)
 ) -> ServicingDemoResponse:
     """Fetch quarantined servicing demo record or return 404."""
     rec = fetch_servicing_demo_record(conn, application_id)

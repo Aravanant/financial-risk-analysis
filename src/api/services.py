@@ -25,7 +25,7 @@ from .schemas import (
 )
 
 
-def fetch_portfolio_kpis(conn: sqlite3.Connection) -> PortfolioKPIsResponse:
+def fetch_portfolio_kpis(conn: Any) -> PortfolioKPIsResponse:
     """Fetch and package primary portfolio KPIs."""
     data = crud.get_portfolio_kpis(conn)
     return PortfolioKPIsResponse(
@@ -42,7 +42,7 @@ def fetch_portfolio_kpis(conn: sqlite3.Connection) -> PortfolioKPIsResponse:
     )
 
 
-def fetch_channel_performance(conn: sqlite3.Connection) -> List[ChannelPerformanceItem]:
+def fetch_channel_performance(conn: Any) -> List[ChannelPerformanceItem]:
     """Fetch channel-level performance breakdown."""
     rows = crud.get_channel_performance(conn)
     return [
@@ -61,7 +61,7 @@ def fetch_channel_performance(conn: sqlite3.Connection) -> List[ChannelPerforman
     ]
 
 
-def fetch_loan_purposes(conn: sqlite3.Connection) -> List[LoanPurposeItem]:
+def fetch_loan_purposes(conn: Any) -> List[LoanPurposeItem]:
     """Fetch purpose-level volume and haircut metrics across all 8 verified categories."""
     rows = crud.get_loan_purposes(conn)
     return [
@@ -86,7 +86,7 @@ def fetch_loan_purposes(conn: sqlite3.Connection) -> List[LoanPurposeItem]:
     ]
 
 
-def fetch_haircut_analysis(conn: sqlite3.Connection) -> HaircutResponse:
+def fetch_haircut_analysis(conn: Any) -> HaircutResponse:
     """
     Fetch comprehensive portfolio-level and purpose-level haircut metrics.
     
@@ -148,7 +148,7 @@ def fetch_haircut_analysis(conn: sqlite3.Connection) -> HaircutResponse:
     )
 
 
-def fetch_risk_tiers(conn: sqlite3.Connection) -> List[RiskTierItem]:
+def fetch_risk_tiers(conn: Any) -> List[RiskTierItem]:
     """Fetch source-provided risk tier summaries."""
     rows = crud.get_risk_tiers(conn)
     return [
@@ -166,7 +166,7 @@ def fetch_risk_tiers(conn: sqlite3.Connection) -> List[RiskTierItem]:
     ]
 
 
-def fetch_data_quality_metrics(conn: sqlite3.Connection) -> DataQualityResponse:
+def fetch_data_quality_metrics(conn: Any) -> DataQualityResponse:
     """Fetch comprehensive data quality audit flags, missingness counts, and exclusions."""
     data = crud.get_data_quality_metrics(conn)
     
@@ -209,7 +209,7 @@ def fetch_data_quality_metrics(conn: sqlite3.Connection) -> DataQualityResponse:
 
 
 def fetch_applications_paginated(
-    conn: sqlite3.Connection,
+    conn: Any,
     page: int = 1,
     page_size: int = 50,
     decision: Optional[str] = None,
@@ -246,7 +246,7 @@ def fetch_applications_paginated(
     )
 
 
-def fetch_application_by_id(conn: sqlite3.Connection, application_id: int) -> Optional[ApplicationSummary]:
+def fetch_application_by_id(conn: Any, application_id: int) -> Optional[ApplicationSummary]:
     """Fetch a single application record by ID."""
     row = crud.get_application_by_id(conn, application_id)
     if not row:
@@ -254,7 +254,7 @@ def fetch_application_by_id(conn: sqlite3.Connection, application_id: int) -> Op
     return ApplicationSummary.model_validate(row)
 
 
-def fetch_servicing_demo_record(conn: sqlite3.Connection, application_id: int) -> Optional[ServicingDemoResponse]:
+def fetch_servicing_demo_record(conn: Any, application_id: int) -> Optional[ServicingDemoResponse]:
     """Fetch demonstration-only synthetic servicing record."""
     row = crud.get_servicing_demo_record(conn, application_id)
     if not row:
