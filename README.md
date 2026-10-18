@@ -456,6 +456,6 @@ For in-depth technical documentation, refer to the following companion specifica
 
 - **Author:** Anant Singh
 - **Target Role:** Data Analyst / Business Analyst / Business Data Analyst (Financial Analytics & Risk Specialization)
-- **License:** MIT License (or relevant open-source license)
+
 - **Last Release Audit:** October 2026 (Milestone 4 Portfolio Readiness)
 # financial-risk-analysis
