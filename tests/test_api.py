@@ -410,6 +410,29 @@ class TestRiskLensAPI(unittest.TestCase):
         self.assertEqual(resp2.status_code, 200)
         self.assertEqual(resp1.json(), resp2.json())
 
+    def test_15_entrypoint_import_no_circular_dependency(self):
+        """Verify src.api.main entrypoint can be imported in isolation without circular import errors."""
+        import subprocess
+        # Test 1: Clean subprocess import of src.api.main:app
+        cmd1 = [sys.executable, "-c", "from src.api.main import app; assert app.title is not None"]
+        proc1 = subprocess.run(cmd1, capture_output=True, text=True)
+        self.assertEqual(proc1.returncode, 0, f"Importing src.api.main failed: {proc1.stderr}")
+
+        # Test 2: Verify custom spec file loader (used by Vercel serverless Python runtime)
+        code2 = (
+            "import importlib.util, sys;"
+            "spec = importlib.util.spec_from_file_location('src.api.main', 'src/api/main.py');"
+            "module = importlib.util.module_from_spec(spec);"
+            "sys.modules['src.api.main'] = module;"
+            "spec.loader.exec_module(module);"
+            "assert hasattr(module, 'app');"
+            "assert module.app.title is not None"
+        )
+        cmd2 = [sys.executable, "-c", code2]
+        proc2 = subprocess.run(cmd2, capture_output=True, text=True)
+        self.assertEqual(proc2.returncode, 0, f"Spec loader execution failed: {proc2.stderr}")
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
+
